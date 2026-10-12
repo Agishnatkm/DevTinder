@@ -1,11 +1,26 @@
 const  express = require("express");
+const {adminAuth} = require("./middlewares/auth");
 const app = express();
-app.use("/hello",(req,res)=>{
-res.send("hellooob api");
-});
-app.use((req,res)=>{
-    res.send("hello from  first server");
-});
+
+app.use("/admin",adminAuth);
+
+
+app.get("/admin",
+    (req,res,next)=>{
+        console.log("hello from  1 user");
+        next()
+    },
+    (req,res,next)=>{
+        res.send("hello from  2nd user");
+        next()
+    },
+    (req,res,next)=>{
+        res.send("hello from  3rd user");
+    },
+    (req,res,next)=>{
+        res.send("hello from  4th user");
+    },
+);
 
 
 app.listen(7777,() => {
