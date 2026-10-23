@@ -32,6 +32,29 @@ app.post("/signup",async(req,res)=>{
         res.status(400).send("ERROR : ", err.message);
     }
 });
+
+//login api
+app.post("/login",async(req,res)=>{
+    try{
+
+       const {email,password} = req.body;
+       const user = await User.findOne({email:email}) ;
+       if(!user?.email){
+        throw new Error("Invalid credential");
+       }
+       const isPasswordCorrect = bcrypt.compare(password,user.password);
+       if(!isPasswordCorrect){
+        throw new Error("Invalid credentials")
+       }
+       if(isPasswordCorrect && email===user.email){
+        res.send("user loggined successfully");
+       }
+    }catch(err){
+        console.log(err)
+        res.status(400).send("ERROR : " + err.message);
+    }
+
+})
 // get all users
 
 app.get("/allUsers",async(req,res)=>{
