@@ -50,7 +50,22 @@ app.delete("/user",async(req,res)=>{
     }catch(err){
         res.send("error something wet wrong")
     }
-})
+});
+
+// update
+ app.patch("/user",async(req,res)=>{
+    const useId = req.body.userId;
+    const data = req.body;
+    try{
+        const user = await User.findbyIdAndUpdate({_id:UsrId,data:{
+            returnDocument:"after",
+            runValidators:true,
+        }});
+        res.send("user updated");
+    }catch(err){
+        console.log("Updation",err.message)
+    }
+ });
 
 connectDB()
     .then(()=>{
