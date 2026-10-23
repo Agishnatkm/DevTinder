@@ -2,17 +2,34 @@ const  express = require("express");
 const app = express();
 const connectDB = require("./config/database");
 const User = require("./models/useTemp");
-
+const {validateSignup} = require("./helper/validate");
+const bcrypt = require("bcrypt");
 app.use(express.json());
 
 app.post("/signup",async(req,res)=>{
-    //creating a new instance of the user model
-    const user = new User(req.body);
     try{
+    //validate  data 
+    
+    validateSignup(req);
+
+    //encrypt the password
+    
+    const {firstName,lastName,email,age,gender,password} = req.body;
+    const encryptedPassword = await bcrypt.hash(password,10);
+    //creating a new instance of the user model
+    const user = new User({
+        firstName,
+        lastName,
+        email,
+        age,gender,
+        password:encryptedPassword
+    });
+    
         await user.save();
         res.send("user signup successfull");
     }catch(err){
-        res.status(400).send("user signup failed",err);
+        console.log(err)
+        res.status(400).send("ERROR : ", err.message);
     }
 });
 // get all users
@@ -53,17 +70,25 @@ app.delete("/user",async(req,res)=>{
 });
 
 // update
- app.patch("/user",async(req,res)=>{
-    const useId = req.body.userId;
+ app.patch("/user/:UserId",async(req,res)=>{
+    const userId = req.params.UserId;
     const data = req.body;
     try{
-        const user = await User.findbyIdAndUpdate({_id:UsrId,data:{
-            returnDocument:"after",
+        const allowed_updates = ["age","gender"];
+        const isUpdateAllowed = Object.keys(data).every((k)=>allowed_updates.includes(k));
+        console.log(isUpdateAllowed);
+        if(!isUpdateAllowed){
+            throw new Error("Update not allowed");
+        }
+        const user = await User.findByIdAndUpdate( userId, data,{
             runValidators:true,
-        }});
+        });
+        if(!user){
+            res.send("user not found", userId,data);
+        }
         res.send("user updated");
     }catch(err){
-        console.log("Updation",err.message)
+        console.log(err.message)
     }
  });
 

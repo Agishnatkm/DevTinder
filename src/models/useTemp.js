@@ -15,15 +15,19 @@ const userSchema = mongoose.Schema({
         type:String,
         unique:true,
         required:true,
-        maxlength:25,
+        maxlength:50,
         lowercase:true,
     },
     age:{
         type:Number,
-        required:true,
     },
     gender:{
-        type:String
+        type:String,
+    },
+    password:{
+        type:String,
+        required:true,
+        minLength:6,
     }
 },{
     timeStamps:true
