@@ -5,7 +5,10 @@ const User = require("./models/useTemp");
 const {validateSignup} = require("./helper/validate");
 const bcrypt = require("bcrypt");
 app.use(express.json());
-
+const jwt = require('jsonwebtoken');
+const cookieParser = require("cookie-parser");
+app.use(cookieParser());
+const  {userAuth} = require("./middlewares/auth");
 app.post("/signup",async(req,res)=>{
     try{
     //validate  data 
@@ -42,19 +45,33 @@ app.post("/login",async(req,res)=>{
        if(!user?.email){
         throw new Error("Invalid credential");
        }
-       const isPasswordCorrect = bcrypt.compare(password,user.password);
-       if(!isPasswordCorrect){
+       const isPasswordCorrect = await user.validatePassword(password);
+       if(isPasswordCorrect){
+        const token = await user.getJWT();
+        res.cookie("token",token)
+         res.send("user loggined successfully");
+       }else{
         throw new Error("Invalid credentials")
        }
-       if(isPasswordCorrect && email===user.email){
-        res.send("user loggined successfully");
-       }
+       
+      
     }catch(err){
         console.log(err)
         res.status(400).send("ERROR : " + err.message);
     }
 
 })
+// get profile
+app.get("/profile",userAuth, async (req, res) => {
+    try {
+       const user = req.user;
+       
+        res.send(user);
+
+    } catch (err) {
+        res.status(401).send("ERROR: " + err.message);
+    }
+});
 // get all users
 
 app.get("/allUsers",async(req,res)=>{
