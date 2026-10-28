@@ -1,12 +1,12 @@
 const mongoose = require("mongoose");
 const jwt = require('jsonwebtoken');
 const bcrypt = require("bcrypt");
+
 const userSchema = mongoose.Schema({
     firstName:{
         type:String,
         required:true,
         minLength:3,
-    
     },
     lastName:{
         type:String,
@@ -24,6 +24,16 @@ const userSchema = mongoose.Schema({
     },
     gender:{
         type:String,
+    },
+    skills:{
+        type:Array,
+    },
+    photoUrl:{
+        type:String,
+    },
+    about:{
+        type:String,
+        maxlength:100,
     },
     password:{
         type:String,
@@ -45,6 +55,5 @@ userSchema.methods.validatePassword = async function(inputPassword) {
  const ispasswordValid = await bcrypt.compare(inputPassword,userPassword);
  return ispasswordValid;
 };
-    
 
 module.exports = mongoose.model("user",userSchema);

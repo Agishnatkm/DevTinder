@@ -8,70 +8,13 @@ app.use(express.json());
 const jwt = require('jsonwebtoken');
 const cookieParser = require("cookie-parser");
 app.use(cookieParser());
-const  {userAuth} = require("./middlewares/auth");
-app.post("/signup",async(req,res)=>{
-    try{
-    //validate  data 
-    
-    validateSignup(req);
 
-    //encrypt the password
-    
-    const {firstName,lastName,email,age,gender,password} = req.body;
-    const encryptedPassword = await bcrypt.hash(password,10);
-    //creating a new instance of the user model
-    const user = new User({
-        firstName,
-        lastName,
-        email,
-        age,gender,
-        password:encryptedPassword
-    });
-    
-        await user.save();
-        res.send("user signup successfull");
-    }catch(err){
-        console.log(err)
-        res.status(400).send("ERROR : ", err.message);
-    }
-});
-
-//login api
-app.post("/login",async(req,res)=>{
-    try{
-
-       const {email,password} = req.body;
-       const user = await User.findOne({email:email}) ;
-       if(!user?.email){
-        throw new Error("Invalid credential");
-       }
-       const isPasswordCorrect = await user.validatePassword(password);
-       if(isPasswordCorrect){
-        const token = await user.getJWT();
-        res.cookie("token",token)
-         res.send("user loggined successfully");
-       }else{
-        throw new Error("Invalid credentials")
-       }
-       
-      
-    }catch(err){
-        console.log(err)
-        res.status(400).send("ERROR : " + err.message);
-    }
-
-})
+const authRouter = require("./routes/auth");
+const profileRouter = require("./routes/profile");
+app.use("/", authRouter);
+app.use("/", profileRouter);
 // get profile
-app.get("/profile",userAuth, async (req, res) => {
-    try {
-       const user = req.user;
-       
-        res.send(user);
 
-    } catch (err) {
-        res.status(401).send("ERROR: " + err.message);
-    }
-});
 // get all users
 
 app.get("/allUsers",async(req,res)=>{
