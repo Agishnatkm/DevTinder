@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const validator = require("validator");
 const jwt = require('jsonwebtoken');
 const bcrypt = require("bcrypt");
 
@@ -18,6 +19,11 @@ const userSchema = mongoose.Schema({
         required:true,
         maxlength:50,
         lowercase:true,
+        validate(value){
+            if(!validator.isEmail(value)){
+                throw new Error("Invalid email address " + value +" !!");
+            }
+        },
     },
     age:{
         type:Number,
