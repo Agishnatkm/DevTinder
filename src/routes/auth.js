@@ -27,10 +27,10 @@ authRouter.post("/signup",async(req,res)=>{
     });
     
         await user.save();
-        res.send("user signup successfull");
+        return res.json("user signup successfull");
     }catch(err){
         console.log(err)
-        res.status(400).send("ERROR : ", err.message);
+        return res.status(400).json("ERROR : ", err.message);
     }
 });
 

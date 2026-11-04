@@ -12,7 +12,7 @@ const validateSignup=(req) =>{
         throw new Error("Email is not valid");
     }
     if(!validator.isStrongPassword(password)){
-        throw new Error("Please enter strong password")
+        throw new Error("Please enter strong password");
     }
 }
 const validateEditProfileData = async function(req){

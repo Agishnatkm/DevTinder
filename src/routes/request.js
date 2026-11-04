@@ -72,7 +72,6 @@ requestRouter.post("/request/review/:status/:requestId",userAuth,async(req,res)=
                 message:"Invalid status",
             });
         }
-        console.log("requestId:",requestId,"userId:",loggedInUser._id);
 
         const connectRequest = await ConnectionRequest.findOne({
             _id:requestId,
