@@ -14,7 +14,7 @@ userRouter.get("/user/requests/pending", userAuth, async (req, res) => {
             status: "interested",
         }).populate("fromUserId", ["firstName", "lastName", "age", "gender"]);
 
-        if (connectionRequests.length <= 0) {
+        if (!connectionRequests && connectionRequests.length <= 0) {
             return res.status(404).json({
                 message: "woohaa there is no pending requests!!"
             })
@@ -41,19 +41,21 @@ userRouter.get("/user/connections", userAuth, async (req, res) => {
             ]
         }).populate("fromUserId", user_safe_data)
             .populate("toUserId", user_safe_data)
-
-        if (connections.length <= 0) {
-            return res.status(404).json({
+        console.log("connections",connections);
+        if (connections.length <= 0 || !connections) {
+            return res.status(204).json({
                 message: "sorry, you dont have any connections.."
             })
         } else {
             const data = connections.map((row) => {
                 if (row.fromUserId._id.toString() === loggedInUser._id.toString()) {
                     return row.toUserId
+                }else if( row.toUserId._id.toString() === loggedInUser._id.toString()){
+                    return row.fromUserId
                 }
             }
             );
-
+            console.log(data);
             return res.status(200).json({
                 message: "connection fetched successfully",
                 data: data
@@ -91,12 +93,12 @@ userRouter.get("/feed", userAuth, async (req, res) => {
             .skip(skip)
             .limit(limit);
 
-        return res.json({
+        return res.status(200).json({
             message: "Feed fetched successfully",
             data: users
         })
     } catch (err) {
-        return res.status(400).json({
+        return res.status(401).json({
             message: err.message
         });
     }

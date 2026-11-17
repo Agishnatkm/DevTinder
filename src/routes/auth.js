@@ -7,31 +7,37 @@ const {validateSignup} = require("../helper/validate");
 
 const User = require("../models/useTemp");
 // authRouter.use(authRouter)
-authRouter.post("/signup",async(req,res)=>{
-    try{
-    //validate  data 
-    
+authRouter.post("/signup", async (req, res) => {
+  try {
+    console.log("inside signup be - ", req.body)
+    // Validation of data
     validateSignup(req);
 
-    //encrypt the password
-    
-    const {firstName,lastName,email,age,gender,password} = req.body;
-    const encryptedPassword = await bcrypt.hash(password,10);
-    //creating a new instance of the user model
+    const { firstName, lastName, email, password } = req.body;
+
+    // Encrypt the password
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    //   Creating a new instance of the User model
     const user = new User({
-        firstName,
-        lastName,
-        email,
-        age,gender,
-        password:encryptedPassword
+      firstName,
+      lastName,
+      email,
+      password: passwordHash,
     });
-    
-        await user.save();
-        return res.json("user signup successfull");
-    }catch(err){
-        console.log(err)
-        return res.status(400).json("ERROR : ", err.message);
-    }
+
+    const savedUser = await user.save();
+    const token = await savedUser.getJWT();
+    console.log(token);
+
+    res.cookie("token", token, {
+      expires: new Date(Date.now() + 8 * 3600000),
+    });
+
+    res.json({ message: "User Added successfully!", data: savedUser });
+  } catch (err) {
+    res.status(400).send("ERROR : " + err.message);
+  }
 });
 
 //login
@@ -57,8 +63,7 @@ authRouter.post("/login",async(req,res)=>{
        
       
     }catch(err){
-        console.log(err)
-        return res.status(400).json("ERROR : " + err.message);
+        return res.status(401).json("ERROR : " + err.message);
     }
 
 });

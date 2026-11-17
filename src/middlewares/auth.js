@@ -1,43 +1,43 @@
-const cookies = require("cookie-parser");
+
 const jwt = require("jsonwebtoken");
 const User = require("../models/useTemp");
-const adminAuth = (req,res,next)=>{
-    console.log("admin Auth triggered");
-    const token="xyz";
-    const isAdminAuthenticated = token === "xyz";
-    if(!isAdminAuthenticated){
-        req.send("Authentication Error");
-    }else{
-        next();
-    }
-}
 
-const userAuth = async (req,res,next)=>{
-    try{
-        //read token from the cookies
-        const {token} = req.cookies;
-        if(!token){
-            throw new Error("Invalid tokken")
+const userAuth = async (req, res, next) => {
+    try {
+        // Read token from cookies
+        const { token } = req.cookies || {};
+
+        if (!token) {
+            return res.status(401).json({
+                message: "Authentication token missing"
+            });
         }
-        const decodedObj = await jwt.verify(token,"DEv@tinder#1996");
-        console.log(decodedObj);
-        const {_id} = decodedObj;
+
+        const decodedObj = jwt.verify(
+            token,
+            "DEv@tinder#1996"
+        );
+
+        const { _id } = decodedObj;
+
         const user = await User.findById(_id);
-        req.user = user;
-        if(!user){
-            throw new Error("User not found");
-        }else{
-            next();
+
+        if (!user) {
+            return res.status(401).json({
+                message: "User not found"
+            });
         }
-        
-    }catch(err){
-        res.send("ERROR : "+ err.message,);
+
+        req.user = user;
+        next();
+
+    } catch (err) {
+        return res.status(401).json({
+            message: err.message || "Invalid token"
+        });
     }
-    
-}
-module.exports={
-    adminAuth, userAuth
 };
 
-
-
+module.exports = {
+    userAuth
+};

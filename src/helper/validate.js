@@ -4,7 +4,9 @@ const validator = require("validator");
 const User = require("../models/useTemp");
 
 const validateSignup=(req) =>{
+    console.log(req.body)
     const {firstName,lastName,email,password} = req.body;
+    console.log(firstName)
     if(!firstName || !lastName){
         throw new Error("Name is not valid");
     }
@@ -18,7 +20,7 @@ const validateSignup=(req) =>{
 const validateEditProfileData = async function(req){
     const loggedinUser = req.user;
     const data= req.body;
-    const allowed_updates = ["age","gender","skills","photoUrl","about"];
+    const allowed_updates = ["firstName","lastName","age","gender","skills","photoUrl","about"];
     const isUpdateAllowed = Object.keys(data).every((k)=>allowed_updates.includes(k));
     if(!isUpdateAllowed){
         throw new Error("Update not allowed");
